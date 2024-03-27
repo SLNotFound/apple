@@ -1,4 +1,4 @@
-package v3_service
+package service
 
 type Add struct {
 	A int `json:"a"`

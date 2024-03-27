@@ -1,8 +1,8 @@
-package v3_endpoint
+package endpoint
 
 import (
-	"apple/higher/v3/utils"
-	"apple/higher/v3/v3_service"
+	"apple/higher/service"
+	"apple/higher/utils"
 	"context"
 	"errors"
 	"fmt"
@@ -15,7 +15,7 @@ func LoggingMiddleware(logger *zap.Logger) endpoint.Middleware {
 	return func(next endpoint.Endpoint) endpoint.Endpoint {
 		return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 			defer func(begin time.Time) {
-				logger.Debug(fmt.Sprint(ctx.Value(v3_service.ContextReqUUid)), zap.Any("调用 v3_endpoint LoggingMiddleware", "处理完请求"), zap.Any("耗时毫秒", time.Since(begin).Milliseconds()))
+				logger.Debug(fmt.Sprint(ctx.Value(service.ContextReqUUid)), zap.Any("调用 endpoint LoggingMiddleware", "处理完请求"), zap.Any("耗时毫秒", time.Since(begin).Milliseconds()))
 			}(time.Now())
 			return next(ctx, request)
 		}
@@ -28,12 +28,12 @@ func AuthMiddleware(logger *zap.Logger) endpoint.Middleware {
 			token := fmt.Sprint(ctx.Value(utils.JWT_CONTEXT_KEY))
 			if token == "" {
 				err = errors.New("请登录")
-				logger.Debug(fmt.Sprint(ctx.Value(v3_service.ContextReqUUid)), zap.Any("[AuthMiddleware]", "token == empty"), zap.Error(err))
+				logger.Debug(fmt.Sprint(ctx.Value(service.ContextReqUUid)), zap.Any("[AuthMiddleware]", "token == empty"), zap.Error(err))
 				return "", err
 			}
 			jwtInfo, err := utils.ParseToken(token)
 			if err != nil {
-				logger.Debug(fmt.Sprint(ctx.Value(v3_service.ContextReqUUid)), zap.Any("[AuthMiddleware]", "ParseToken"), zap.Error(err))
+				logger.Debug(fmt.Sprint(ctx.Value(service.ContextReqUUid)), zap.Any("[AuthMiddleware]", "ParseToken"), zap.Error(err))
 				return "", err
 			}
 			if v, ok := jwtInfo["Name"]; ok {

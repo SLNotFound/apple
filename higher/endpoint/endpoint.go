@@ -1,7 +1,7 @@
-package v3_endpoint
+package endpoint
 
 import (
-	"apple/higher/v3/v3_service"
+	"apple/higher/service"
 	"context"
 	"github.com/go-kit/kit/endpoint"
 	"go.uber.org/zap"
@@ -12,7 +12,7 @@ type EndPointServer struct {
 	LoginEndPoint endpoint.Endpoint
 }
 
-func NewEndPointServer(svc v3_service.Service, log *zap.Logger) EndPointServer {
+func NewEndPointServer(svc service.Service, log *zap.Logger) EndPointServer {
 	var addEndPoint endpoint.Endpoint
 	{
 		addEndPoint = MakeAddEndPoint(svc)
@@ -27,27 +27,27 @@ func NewEndPointServer(svc v3_service.Service, log *zap.Logger) EndPointServer {
 	return EndPointServer{AddEndPoint: addEndPoint, LoginEndPoint: loginEndPoint}
 }
 
-func (s EndPointServer) Add(ctx context.Context, in v3_service.Add) v3_service.AddAck {
+func (s EndPointServer) Add(ctx context.Context, in service.Add) service.AddAck {
 	res, _ := s.AddEndPoint(ctx, in)
-	return res.(v3_service.AddAck)
+	return res.(service.AddAck)
 }
 
-func MakeAddEndPoint(s v3_service.Service) endpoint.Endpoint {
+func MakeAddEndPoint(s service.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-		req := request.(v3_service.Add)
+		req := request.(service.Add)
 		res := s.TestAdd(ctx, req)
 		return res, nil
 	}
 }
 
-func (s EndPointServer) Login(ctx context.Context, in v3_service.Login) (v3_service.LoginAck, error) {
+func (s EndPointServer) Login(ctx context.Context, in service.Login) (service.LoginAck, error) {
 	res, err := s.LoginEndPoint(ctx, in)
-	return res.(v3_service.LoginAck), err
+	return res.(service.LoginAck), err
 }
 
-func MakeLoginEndPoint(s v3_service.Service) endpoint.Endpoint {
+func MakeLoginEndPoint(s service.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-		req := request.(v3_service.Login)
+		req := request.(service.Login)
 		return s.Login(ctx, req)
 	}
 }

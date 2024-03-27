@@ -1,4 +1,4 @@
-package v3_service
+package service
 
 import (
 	"context"
@@ -26,7 +26,7 @@ func NewLogMiddlewareServer(log *zap.Logger) NewMiddlewareServer {
 
 func (l logMiddlewareServer) TestAdd(ctx context.Context, in Add) (out AddAck) {
 	defer func() {
-		l.logger.Debug(fmt.Sprint(ctx.Value(ContextReqUUid)), zap.Any("调用 v2_service logMiddlewareServer", "TestAdd"), zap.Any("req", in), zap.Any("res", out))
+		l.logger.Debug(fmt.Sprint(ctx.Value(ContextReqUUid)), zap.Any("调用 service logMiddlewareServer", "TestAdd"), zap.Any("req", in), zap.Any("res", out))
 	}()
 	out = l.next.TestAdd(ctx, in)
 	return out

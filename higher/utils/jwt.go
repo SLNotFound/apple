@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-var jwtSecret = []byte("jwtSecret_v3")
+var jwtSecret = []byte("jwtSecret")
 
 const JWT_CONTEXT_KEY = "jwt_context_key"
 
