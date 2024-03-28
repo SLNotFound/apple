@@ -19,10 +19,10 @@ func CreateJwtToken(name string, dcId int) (string, error) {
 	var token Token
 	token.StandardClaims = jwt.StandardClaims{
 		Audience:  "",
-		ExpiresAt: time.Now().Add(30 * time.Second).Unix(),
+		ExpiresAt: time.Now().Add(30 * time.Minute).Unix(),
 		Id:        "",
 		IssuedAt:  time.Now().Unix(),
-		Issuer:    "kit_v3",
+		Issuer:    "kit",
 		NotBefore: time.Now().Unix(),
 		Subject:   "login",
 	}

@@ -4,7 +4,9 @@ import (
 	"apple/higher/service"
 	"context"
 	"github.com/go-kit/kit/endpoint"
+	"go.uber.org/ratelimit"
 	"go.uber.org/zap"
+	"golang.org/x/time/rate"
 )
 
 type EndPointServer struct {
@@ -12,17 +14,19 @@ type EndPointServer struct {
 	LoginEndPoint endpoint.Endpoint
 }
 
-func NewEndPointServer(svc service.Service, log *zap.Logger) EndPointServer {
+func NewEndPointServer(svc service.Service, log *zap.Logger, limit *rate.Limiter, limiter ratelimit.Limiter) EndPointServer {
 	var addEndPoint endpoint.Endpoint
 	{
 		addEndPoint = MakeAddEndPoint(svc)
 		addEndPoint = LoggingMiddleware(log)(addEndPoint)
 		addEndPoint = AuthMiddleware(log)(addEndPoint)
+		addEndPoint = NewUberRateMiddleware(limiter)(addEndPoint)
 	}
 	var loginEndPoint endpoint.Endpoint
 	{
 		loginEndPoint = MakeLoginEndPoint(svc)
 		loginEndPoint = LoggingMiddleware(log)(loginEndPoint)
+		loginEndPoint = NewGolangRateAllowMiddleware(limit)(loginEndPoint)
 	}
 	return EndPointServer{AddEndPoint: addEndPoint, LoginEndPoint: loginEndPoint}
 }

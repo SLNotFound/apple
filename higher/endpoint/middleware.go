@@ -7,7 +7,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-kit/kit/endpoint"
+	"go.uber.org/ratelimit"
 	"go.uber.org/zap"
+	"golang.org/x/time/rate"
 	"time"
 )
 
@@ -39,6 +41,37 @@ func AuthMiddleware(logger *zap.Logger) endpoint.Middleware {
 			if v, ok := jwtInfo["Name"]; ok {
 				ctx = context.WithValue(ctx, "name", v)
 			}
+			return next(ctx, request)
+		}
+	}
+}
+
+func NewGolangRateWaitMiddleware(limit *rate.Limiter) endpoint.Middleware {
+	return func(next endpoint.Endpoint) endpoint.Endpoint {
+		return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+			if err = limit.Wait(ctx); err != nil {
+				return "", errors.New("limit req wait")
+			}
+			return next(ctx, request)
+		}
+	}
+}
+
+func NewGolangRateAllowMiddleware(limit *rate.Limiter) endpoint.Middleware {
+	return func(next endpoint.Endpoint) endpoint.Endpoint {
+		return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+			if !limit.Allow() {
+				return "", errors.New("limit req Allow")
+			}
+			return next(ctx, request)
+		}
+	}
+}
+
+func NewUberRateMiddleware(limit ratelimit.Limiter) endpoint.Middleware {
+	return func(next endpoint.Endpoint) endpoint.Endpoint {
+		return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+			limit.Take()
 			return next(ctx, request)
 		}
 	}
